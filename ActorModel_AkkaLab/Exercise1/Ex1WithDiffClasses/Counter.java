@@ -14,7 +14,7 @@ public class Counter {
 		final ActorRef counter = sys.actorOf(CounterActor.props(), "counter");
 
 		// Send messages from multiple threads in parallel
-		/*final ExecutorService exec = Executors.newFixedThreadPool(numThreads);
+		final ExecutorService exec = Executors.newFixedThreadPool(numThreads);
 
 		for (int i = 0; i < numMessages; i++) {
 			exec.submit(() -> counter.tell(new SimpleMessage(), ActorRef.noSender()));
@@ -28,14 +28,8 @@ public class Counter {
 			e.printStackTrace();
 		}
 		exec.shutdown();
-		sys.terminate(); */
-        counter.tell(new DecrementMessage(), ActorRef.noSender());
-        counter.tell(new DecrementMessage(), ActorRef.noSender());
-        counter.tell(new SimpleMessage(), ActorRef.noSender());
-        counter.tell(new DecrementMessage(), ActorRef.noSender());
-        counter.tell(new SimpleMessage(), ActorRef.noSender());
-        counter.tell(new SimpleMessage(), ActorRef.noSender());
-
+		sys.terminate();
 	}
 
 }
+
