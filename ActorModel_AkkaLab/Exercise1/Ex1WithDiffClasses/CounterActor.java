@@ -20,19 +20,13 @@ public class CounterActor extends AbstractActorWithStash {
 	}
 
 	void onMessage(SimpleMessage msg) {
-        //int before = counter;
         counter++;
         System.out.println("Counter increased to " + counter);
-        unstashAll();
 	}
 
     void onMessageDecrement(DecrementMessage msg) {
-        if (counter == 0) {
-            stash();
-        } else {
             counter--;
             System.out.println("Counter increased to " + counter);
-        }
     }
 
 	public static Props props() {
@@ -40,3 +34,4 @@ public class CounterActor extends AbstractActorWithStash {
 	}
 
 }
+
