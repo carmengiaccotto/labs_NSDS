@@ -1,5 +1,0 @@
-package com.Exercises.Ex1WithDiffClasses;
-
-public class SimpleMessage {
-
-}

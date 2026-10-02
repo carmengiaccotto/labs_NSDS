@@ -1,0 +1,254 @@
+[
+    {
+        "id": "7abd59c40768783c",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "7927ef26acacda89",
+        "type": "function",
+        "z": "7abd59c40768783c",
+        "name": "Parser",
+        "func": "let text = msg.payload.content;\nlet parts = text.split(\" \");\nlet command = parts[0].toUpperCase();\nlet city = parts[1];\nlet country = parts[2] || \"\";\n\nmsg.location = { city: city, country: country };\nmsg.chatId = msg.originalMessage.chat.id;\n\nif (command === \"QUERY\") {\n    return [msg, null, null];\n    \n} else if (command === \"TRACK\") {\n    return [null, msg, null];\n    \n} else if (command === \"REPORT\") {\n    return [null, null, msg];\n    \n} else {\n    return null; \n}",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 290,
+        "y": 320,
+        "wires": [
+            [
+                "b3e82970ebfb25b3"
+            ],
+            [
+                "0f863fc93ca1562b"
+            ],
+            [
+                "ad6dc53c2daa0502"
+            ]
+        ]
+    },
+    {
+        "id": "0f863fc93ca1562b",
+        "type": "function",
+        "z": "7abd59c40768783c",
+        "name": "Save",
+        "func": "let tracked = global.get('weatherUsers') || {};\nlet chatId = msg.chatId;\n\nif (!tracked[chatId]) tracked[chatId] = [];\n\ntracked[chatId].push(msg.location);\n\nglobal.set('weatherUsers', tracked);\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 320,
+        "wires": [
+            [
+                "e0214cd9b66514a3"
+            ]
+        ]
+    },
+    {
+        "id": "ad6dc53c2daa0502",
+        "type": "function",
+        "z": "7abd59c40768783c",
+        "name": "Iterator",
+        "func": "let tracked = global.get('weatherUsers') || {};\nlet chatId = msg.chatId;\nlet list = tracked[chatId];\n\nif (!list || list.length === 0) {\n    msg.payload = { content: \"No locations tracked.\" };\n    return [null]; \n}\n\nlet messages = [];\n\nfor (let i = 0; i < list.length; i++) {\n    let loc = list[i];\n    let newMsg =RED.util.cloneMessage(msg);\n    newMsg.location = { city: loc.city, country: loc.country };\n\n    newMsg.parts = {\n        id: msg._msgid,\n        index: i,\n        count: list.length,\n        type: 'array'\n    };\n\n    messages.push(newMsg);\n}\n\nreturn [messages];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 420,
+        "wires": [
+            [
+                "71437690dad97884"
+            ]
+        ]
+    },
+    {
+        "id": "3fe97f80ed6b8fbf",
+        "type": "join",
+        "z": "7abd59c40768783c",
+        "name": "",
+        "mode": "auto",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": true,
+        "timeout": "",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1090,
+        "y": 420,
+        "wires": [
+            [
+                "14db243e7d3d9ff0"
+            ]
+        ]
+    },
+    {
+        "id": "815bd20f8563f6e2",
+        "type": "chatbot-message",
+        "z": "7abd59c40768783c",
+        "name": "Output",
+        "message": [
+            {
+                "message": "The temperature in {{msg.payload.location}} is {{msg.payload.tempc}}C!"
+            }
+        ],
+        "language": "none",
+        "x": 910,
+        "y": 200,
+        "wires": [
+            [
+                "14db243e7d3d9ff0"
+            ]
+        ]
+    },
+    {
+        "id": "6d407d71a86016c0",
+        "type": "chatbot-message",
+        "z": "7abd59c40768783c",
+        "name": "Output",
+        "message": [
+            {
+                "message": "The temperature in {{msg.payload.location}} is {{msg.payload.tempc}}C!"
+            }
+        ],
+        "language": "none",
+        "x": 930,
+        "y": 420,
+        "wires": [
+            [
+                "3fe97f80ed6b8fbf"
+            ]
+        ]
+    },
+    {
+        "id": "e0214cd9b66514a3",
+        "type": "chatbot-message",
+        "z": "7abd59c40768783c",
+        "name": "Output",
+        "message": [
+            {
+                "message": "Tracking temperature for {{msg.location.city}}!"
+            }
+        ],
+        "language": "none",
+        "x": 910,
+        "y": 320,
+        "wires": [
+            [
+                "14db243e7d3d9ff0"
+            ]
+        ]
+    },
+    {
+        "id": "efe9dc04c26d6a1e",
+        "type": "chatbot-telegram-receive",
+        "z": "7abd59c40768783c",
+        "bot": "5f951d5a7f81bc9b",
+        "botProduction": "",
+        "x": 90,
+        "y": 360,
+        "wires": [
+            [
+                "7927ef26acacda89"
+            ]
+        ]
+    },
+    {
+        "id": "14db243e7d3d9ff0",
+        "type": "chatbot-telegram-send",
+        "z": "7abd59c40768783c",
+        "bot": "5f951d5a7f81bc9b",
+        "botProduction": "",
+        "track": false,
+        "passThrough": false,
+        "errorOutput": false,
+        "outputs": 0,
+        "x": 1330,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "b3e82970ebfb25b3",
+        "type": "openweathermap",
+        "z": "7abd59c40768783c",
+        "name": "",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "",
+        "country": "",
+        "language": "en",
+        "x": 650,
+        "y": 180,
+        "wires": [
+            [
+                "815bd20f8563f6e2"
+            ]
+        ]
+    },
+    {
+        "id": "71437690dad97884",
+        "type": "openweathermap",
+        "z": "7abd59c40768783c",
+        "name": "",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "",
+        "country": "",
+        "language": "en",
+        "x": 710,
+        "y": 420,
+        "wires": [
+            [
+                "6d407d71a86016c0"
+            ]
+        ]
+    },
+    {
+        "id": "5f951d5a7f81bc9b",
+        "type": "chatbot-telegram-node",
+        "botname": "prova",
+        "usernames": "",
+        "polling": 1000,
+        "store": "",
+        "log": "",
+        "debug": false,
+        "skipMediaFiles": false,
+        "webHook": "",
+        "connectMode": "polling",
+        "storeMessages": true,
+        "enableMissionControl": false,
+        "inspectMessages": true,
+        "chatbotId": ""
+    },
+    {
+        "id": "67c99b38b33f5c58",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-chatbot": "1.2.4",
+            "node-red-node-openweathermap": "1.0.1"
+        }
+    }
+]
