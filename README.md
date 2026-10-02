@@ -18,6 +18,10 @@ The labs cover several key technologies for developing networked and distributed
 
 The folders `akka/`, `contiki-ng/` and `node-red/` include a README describing the solution in detail.
 
+### Acknowledgements
+
+Each evaluation lab started from a code skeleton provided by the course instructors (e.g. the main classes, part of the message classes and the input data generation). The Contiki-NG code is based on the `rpl-udp` example of [Contiki-NG](https://github.com/contiki-ng/contiki-ng). The rest of the code is our own work.
+
 ### List of Authors:
  - *[Carmen Giaccotto](https://github.com/carmengiaccotto)*
  - *[Alessia Franchetti-Rosada](https://github.com/alessiafranchetti)*
